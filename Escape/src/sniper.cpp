@@ -18,8 +18,8 @@
 /*************************************
  * CUSTOMIZE THIS NUMBER TO SET YOUR CODES
  */
-const uint8_t code[] = {1050, 0050, 0007}; // Different codes beginning with the first stage
-const uint8_t levels = 3;                  // Total number of stages
+const int code[] = {1050, 0050, 0007}; // Different codes beginning with the first stage
+const uint8_t levels = 3;              // Total number of stages
 
 /**
  * @brief PIN number of an LED.
@@ -29,16 +29,16 @@ const uint8_t levels = 3;                  // Total number of stages
 static const int BUILTINLED = 2;
 
 // Pins for the 7-segment display
-#define CLK_PIN D5
-#define DIO_PIN D6
+#define CLK_PIN 4
+#define DIO_PIN 5
 
 // Pins for the buttons
-#define BUTTON_A_PIN D2
-#define BUTTON_B_PIN D3
-#define BUTTON_C_PIN D4
+#define BUTTON_A_PIN 12
+#define BUTTON_B_PIN 13
+#define BUTTON_C_PIN 14
 
 // Pin for speaker
-#define SOUND_PIN 11
+#define SOUND_PIN 15
 
 // Delay between frames in milliseconds
 #define FRAME_DELAY 100
@@ -56,7 +56,7 @@ TM1637Display display(CLK_PIN, DIO_PIN);
 
 int digitIndex = 1; // Never select the leftmost digit
 int digitValue = 0;
-uint8_t currentDigit[4] = {0, 0, 0, 0};
+int currentDigit[4] = {0, 0, 0, 0};
 
 int codeStage = 0;
 
@@ -96,34 +96,6 @@ uint8_t getDigits()
   return currentDigit[0] * 1000 + currentDigit[1] * 100 + currentDigit[2] * 10 + currentDigit[3];
 }
 
-void handleButtonC()
-{
-  if (code[codeStage] == getDigits())
-  {              // Check if the correct code for the current codeStage is being displayed
-    codeStage++; // If so, advance the stage
-    success();
-    digitValue = 0; // clear all the numbers
-    for (int i = 0; i < 4; i++)
-    {
-      digitIndex = i;
-      updateDisplay();
-    }
-    if (codeStage == levels) // If that was the last stage, turn every segment on
-    {
-      display.setSegments(allON);
-      laserSound();
-    }
-    else
-    {
-      digitIndex = codeStage + 1;
-    }
-  }
-  else
-  {
-    failure();
-  }
-}
-
 void success()
 {
   display.setSegments(yes);
@@ -149,6 +121,34 @@ void laserSound()
       digitalWrite(SOUND_PIN, LOW);
       delayMicroseconds(i);
     }
+  }
+}
+
+void handleButtonC()
+{
+  if (code[codeStage] == getDigits())
+  {              // Check if the correct code for the current codeStage is being displayed
+    codeStage++; // If so, advance the stage
+    success();
+    digitValue = 0; // clear all the numbers
+    for (int i = 0; i < 4; i++)
+    {
+      digitIndex = i;
+      updateDisplay();
+    }
+    if (codeStage == levels) // If that was the last stage, turn every segment on
+    {
+      display.setSegments(allON);
+      laserSound();
+    }
+    else
+    {
+      digitIndex = codeStage + 1;
+    }
+  }
+  else
+  {
+    failure();
   }
 }
 
