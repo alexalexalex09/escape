@@ -12,18 +12,24 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(DIODE_PIN, GPIO.OUT)
 
 # Define the keyboard input code to trigger the diode
-TARGET_CODE = "493759#"
+TARGET_CODE = "493759"
 
-# Initialize the input buffer
-input_buffer = ""
+# Function to search for an item in a list
+def search_item(item, my_list):
+    for i in my_list:
+        print(i)
+        if isinstance(i, tuple) and i[0].startswith(item):
+            return i
+    return -1
 
-# Function to handle keyboard events
+# Function to handle keyboard4 events
 def handle_keyboard_events():
     # Find the USB keyboard device
     devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
     keyboard = None
     for device in devices:
-        if "keyboard" in device.name.lower():
+        index = search_item('KEY_KP1', device.capabilities(verbose=True)[('EV_KEY',1)])
+        if index != -1:
             keyboard = device
             break
 
@@ -32,13 +38,17 @@ def handle_keyboard_events():
         sys.exit(1)
 
     print("Waiting for input...")
+    input_buffer = ""
     for event in keyboard.read_loop():
         if event.type == evdev.ecodes.EV_KEY:
             key_event = evdev.categorize(event)
             if key_event.keystate == key_event.key_down:
                 key_value = key_event.keycode.split("_")[-1]
-                print(key_value)
-                if key_value == "#":
+                kp = key_value.startswith('KP')
+                if (kp):
+                    key_value = key_value[2:]
+                print(key_value + " entered.")
+                if key_value == "ENTER":
                     # Check if the input code matches the target code
                     if input_buffer != TARGET_CODE:
                         # Turn off the diode and clear the input buffer
@@ -54,6 +64,7 @@ def handle_keyboard_events():
                 else:
                     # Append the pressed key to the input buffer
                     input_buffer += key_value
+                    print("Buffer: " + input_buffer)
 
 # Run the program
 try:
