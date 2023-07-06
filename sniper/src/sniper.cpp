@@ -28,13 +28,13 @@ const uint8_t levels = 3;         // Total number of stages
 static const int BUILTINLED = 2;
 
 // Pins for the 7-segment display
-#define CLK_PIN 4 // D2
-#define DIO_PIN 5 // D1
+#define CLK_PIN 4 // D2 = 4
+#define DIO_PIN 5 // D1 = 5
 
 // Pins for the buttons
-#define BUTTON_A_PIN 12 // D6
-#define BUTTON_B_PIN 13 // D7
-#define BUTTON_C_PIN 14 // D5
+#define BUTTON_A_PIN 12 // D6 = 12
+#define BUTTON_B_PIN 13 // D7 = 13
+#define BUTTON_C_PIN 14 // D5 = 14
 
 // Pin for speaker
 #define SOUND_PIN 15

@@ -13,7 +13,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(DIODE_PIN, GPIO.OUT, initial=GPIO.LOW)
 
 # Define the keyboard input code to trigger the diode
-TARGET_CODE = "439759"
+TARGET_CODE = "459735"
 
 # Function to search for an item in a list
 def search_item(item, my_list):
