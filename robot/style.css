@@ -1,0 +1,49 @@
+@font-face {
+    font-family: VT323;
+    src:url("VT323-Regular.ttf");
+}
+
+body {
+    background-color: rgb(34, 34, 34);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    color: rgb(102, 255, 102);
+    font-family: VT323;
+    font-size: 5vw;
+}
+
+p {
+    text-align: center;
+}
+
+#inputField {
+    width:20em;
+    height:1.2em;
+    display: flex;
+    justify-content: center;
+}
+
+#cursor {
+    animation: blink 1s infinite;
+    background-color:rgb(102, 255, 102);
+    height:1em;
+    width:.5em;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.01; }
+    100% { opacity: 1; }
+}
+
+.flash {
+    animation: flash-red .2s linear 5;
+}
+
+@keyframes flash-red {
+    0% { color: red; }
+    50% { color: rgb(102, 255, 102); }
+}
