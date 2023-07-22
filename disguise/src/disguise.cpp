@@ -33,80 +33,98 @@ byte squarePattern[8] = {
     B10000001,
     B11111111};
 
-int currentPattern = 0;
+int currentTop = 0;
+
+int currentBottom = 0;
 
 int patternCount = 12; // Should be same as size of first dimension in patterns
 
 int buttonPressed = 0;
 
+int correct = 0;
+
+int correctTimestamp = 0;
+
 byte patterns[12][4] = { // first dimension should be same as patternCount
     {
+        // 0
         B00011000,
         B00100100,
         B01000010,
         B10000001,
     },
     {
+        // 1
         B10000001,
         B01000010,
         B00100100,
         B00011000,
     },
     {
+        // 2
         B00011000,
         B00100100,
         B00100100,
         B00011000,
     },
     {
+        // 3
         B11111111,
         B10000001,
         B10000001,
         B10000001,
     },
     {
+        // 4
         B10000001,
         B10000001,
         B10000001,
         B11111111,
     },
     {
+        // 5
         B00011000,
         B00100100,
         B01000010,
         B11111111,
     },
     {
+        // 6
         B11111111,
         B01000010,
         B00100100,
         B00011000,
     },
     {
+        // 7
         B00000000,
         B11111111,
         B00000000,
         B11111111,
     },
     {
+        // 8
         B01010101,
         B01010101,
         B01010101,
         B01010101,
     },
     {
+        // 9
         B00100110,
         B01000010,
         B10000010,
         B01000010,
     },
     {
+        // 10
         B11100000,
         B10000011,
         B10011001,
         B10001001,
     },
     {
+        // 11
         B01000100,
         B11000111,
         B00110000,
@@ -144,6 +162,38 @@ void displayPattern(int startRow, int patternIndex)
   }
 }
 
+void advancePattern(int bottom)
+{
+  if (bottom == 0)
+  {
+    currentTop++;
+    if (currentTop > patternCount)
+    {
+      currentTop = 0;
+    }
+  }
+  else
+  {
+    currentBottom++;
+    if (currentBottom > patternCount)
+    {
+      currentBottom = 0;
+    }
+  }
+}
+
+void flashCorrect()
+{
+  for (int i = 0; i < 5; i++)
+  {
+    displayPattern(0, currentTop);
+    displayPattern(4, currentBottom);
+    delay(500);
+    display.clearDisplay(0);
+    delay(500);
+  }
+}
+
 void setup()
 {
   pinMode(TOP_BUTTON, INPUT_PULLUP);
@@ -165,24 +215,30 @@ void loop()
   // Catch top button press
   if (digitalRead(TOP_BUTTON) == LOW)
   {
-    buttonPressed = 1;
+    advancePattern(0);
+    displayPattern(0, currentTop);
+    delay(200);
   }
   // Catch bottom button press
   if (digitalRead(BOTTOM_BUTTON) == LOW)
   {
-    buttonPressed = 2;
+    advancePattern(1);
+    displayPattern(4, currentBottom);
+    delay(200);
   }
-  // Check if any button was pressed
-  if (buttonPressed > 0)
+  if (currentTop == 5 && currentBottom == 6)
   {
-    currentPattern++;                  // Advance to next pattern
-    if (currentPattern > patternCount) // Wrap to beginning if at the end
+    correct = millis();
+  }
+  else
+  {
+    correct = 0;
+  }
+  if (correct > 0)
+  {
+    if (millis() - correct > 1000)
     {
-      currentPattern = 0;
+      flashCorrect();
     }
-    // Start at row 1-1*4 = 0 if top button, or 2-1*4=4 if bottom button
-    displayPattern((buttonPressed - 1) * 4, currentPattern);
-    buttonPressed = 0; // Reset button press detection
-    delay(200);        // debounce
   }
 }
