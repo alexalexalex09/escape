@@ -45,86 +45,93 @@ int correct = 0;
 
 int correctTimestamp = 0;
 
-byte patterns[12][4] = { // first dimension should be same as patternCount
+byte patterns[13][4] = { // first dimension should be same as patternCount
     {
         // 0
-        B00011000,
-        B00100100,
-        B01000010,
-        B10000001,
+        B00000000,
+        B00000000,
+        B00000000,
+        B00000000,
     },
     {
         // 1
-        B10000001,
-        B01000010,
-        B00100100,
         B00011000,
+        B00100100,
+        B01000010,
+        B10000001,
     },
     {
         // 2
-        B00011000,
-        B00100100,
+        B10000001,
+        B01000010,
         B00100100,
         B00011000,
     },
     {
         // 3
-        B11111111,
-        B10000001,
-        B10000001,
-        B10000001,
+        B00011000,
+        B00100100,
+        B00100100,
+        B00011000,
     },
     {
         // 4
-        B10000001,
-        B10000001,
-        B10000001,
         B11111111,
+        B10000001,
+        B10000001,
+        B10000001,
     },
     {
         // 5
-        B00011000,
-        B00100100,
-        B01000010,
+        B10000001,
+        B10000001,
+        B10000001,
         B11111111,
     },
     {
         // 6
+        B00011000,
+        B00100100,
+        B01000010,
+        B11111111,
+    },
+    {
+        // 7
         B11111111,
         B01000010,
         B00100100,
         B00011000,
     },
     {
-        // 7
-        B00000000,
-        B11111111,
-        B00000000,
-        B11111111,
-    },
-    {
         // 8
-        B01010101,
-        B01010101,
-        B01010101,
-        B01010101,
+        B00000000,
+        B11111111,
+        B00000000,
+        B11111111,
     },
     {
         // 9
+        B01010101,
+        B01010101,
+        B01010101,
+        B01010101,
+    },
+    {
+        // 10
         B00100110,
         B01000010,
         B10000010,
         B01000010,
     },
     {
-        // 10
+        // 11
         B11100000,
         B10000011,
         B10011001,
         B10001001,
     },
     {
-        // 11
+        // 12
         B01000100,
         B11000111,
         B00110000,
@@ -139,6 +146,14 @@ void allOn()
   }
 }
 
+void allOff()
+{
+  for (int row = 0; row < 8; row++)
+  {
+    display.setRow(0, row, B00000000);
+  }
+}
+
 void loopPatterns()
 {
   for (int pat = 0; pat < 12; pat++)
@@ -148,17 +163,28 @@ void loopPatterns()
       display.setRow(0, row, patterns[pat][row]);
       display.setRow(0, row + 4, patterns[pat][row]);
     }
-    delay(500);
+    delay(50);
   }
+  allOff();
 }
 
-void displayPattern(int startRow, int patternIndex)
+void displayHalfPattern(int startRow, int patternIndex)
 {
   display.clearDisplay(0);
   int endRow = startRow + 4;
   for (int row = startRow; row < endRow; row++)
   {
     display.setRow(0, row, patterns[patternIndex][row]);
+  }
+}
+
+void displayPattern(int topPattern, int bottomPattern)
+{
+  display.clearDisplay(0);
+  for (int row = 0; row < 4; row++)
+  {
+    display.setRow(0, row, patterns[topPattern][row]);
+    display.setRow(0, row + 4, patterns[bottomPattern][row]);
   }
 }
 
@@ -186,8 +212,7 @@ void flashCorrect()
 {
   for (int i = 0; i < 5; i++)
   {
-    displayPattern(0, currentTop);
-    displayPattern(4, currentBottom);
+    displayPattern(currentTop, currentBottom);
     delay(500);
     display.clearDisplay(0);
     delay(500);
@@ -196,8 +221,9 @@ void flashCorrect()
 
 void setup()
 {
-  pinMode(TOP_BUTTON, INPUT_PULLUP);
-  pinMode(BOTTOM_BUTTON, INPUT_PULLUP);
+  Serial.println("Startup");
+  pinMode(TOP_BUTTON, INPUT);
+  pinMode(BOTTOM_BUTTON, INPUT);
   display.shutdown(0, false); // Turn on the display
   display.setIntensity(0, 8); // Set the brightness (0-15)
   display.clearDisplay(0);    // Clear the display
@@ -206,29 +232,35 @@ void setup()
   delay(100);
   allOn();
   Serial.println("On");
-  delay(2000);
+  delay(100);
   loopPatterns();
 }
 
 void loop()
 {
   // Catch top button press
-  if (digitalRead(TOP_BUTTON) == LOW)
+  if (digitalRead(TOP_BUTTON) == HIGH)
   {
+    Serial.println("Top");
     advancePattern(0);
-    displayPattern(0, currentTop);
+    displayPattern(currentTop, currentBottom);
     delay(200);
   }
   // Catch bottom button press
-  if (digitalRead(BOTTOM_BUTTON) == LOW)
+  if (digitalRead(BOTTOM_BUTTON) == HIGH)
   {
+    Serial.println("Bottom");
     advancePattern(1);
-    displayPattern(4, currentBottom);
+    displayPattern(currentTop, currentBottom);
     delay(200);
   }
-  if (currentTop == 5 && currentBottom == 6)
+  if (currentTop == 6 && currentBottom == 7 || currentTop == 1 && currentBottom == 7 || currentTop == 6 && currentBottom == 2) // or 1, 7 or 6, 2
   {
-    correct = millis();
+    if (correct == 0)
+    {
+      Serial.println("Correct solution, will we wait long enough?");
+      correct = millis();
+    }
   }
   else
   {
@@ -236,9 +268,14 @@ void loop()
   }
   if (correct > 0)
   {
+    Serial.println("Checking if correct");
     if (millis() - correct > 1000)
     {
+      Serial.println("Correct");
       flashCorrect();
+      currentTop = 0;
+      currentBottom = 0;
+      correct = 0;
     }
   }
 }
